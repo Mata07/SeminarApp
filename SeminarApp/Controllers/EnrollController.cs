@@ -18,11 +18,13 @@ namespace SeminarApp.Controllers
         }
 
         //GET: Enrollments
-        public async Task<IActionResult> Index(string sortOrder)
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
             //sort by title and date columns
             ViewData["TitleSortParm"] = String.IsNullOrEmpty(sortOrder) ? "title_desc" : "";
             ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+            //za search
+            ViewData["CurrentFilter"] = searchString;
 
             //get courses from dbContext
             var courses = from c in _context.Courses
@@ -30,6 +32,12 @@ namespace SeminarApp.Controllers
 
             //select only courses that are not full
             courses = courses.Where(c => c.IsFull == false);
+
+            //search
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                courses = courses.Where(c => c.Title.Contains(searchString));
+            }
 
             //sort by title and date columns
             switch (sortOrder)

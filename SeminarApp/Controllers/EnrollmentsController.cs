@@ -22,18 +22,28 @@ namespace SeminarApp.Controllers
         }
 
         //GET: Enrollments
-        public async Task<IActionResult> Index(string sortOrder)
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
             //sorting by po columns - values for view
             ViewData["LastNameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "lastName_desc" : "";
             ViewData["TitleSortParm"] = sortOrder == "Title" ? "title_desc" : "Title";
             ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
             ViewData["StatusSortParm"] = sortOrder == "Status" ? "status_desc" : "Status";
+            //search
+            ViewData["CurrentFilter"] = searchString;
 
             //load entites
             var enrollments = _context.Enrollments
                 .Include(e => e.Course) //eager loading of related data
                 .AsNoTracking();
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                enrollments = enrollments.Where(e => e.Course.Title.Contains(searchString)
+                                            || e.LastName.Contains(searchString)
+                                            || e.FirstName.Contains(searchString)
+                                            || e.FirstName.Contains(searchString));
+            }
 
             switch (sortOrder) //sorting by columns
             {

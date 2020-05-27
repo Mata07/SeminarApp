@@ -21,13 +21,21 @@ namespace SeminarApp.Controllers
         }
 
         //GET: Courses
-        public async Task<IActionResult> Index(string sortOrder)
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
             ViewData["TitleSortParm"] = String.IsNullOrEmpty(sortOrder) ? "title_desc" : "";
             ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+            //za search
+            ViewData["CurrentFilter"] = searchString;
 
             var courses = from c in _context.Courses
                           select c;
+
+            //search
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                courses = courses.Where(c => c.Title.Contains(searchString));
+            }
 
             switch (sortOrder)
             {
